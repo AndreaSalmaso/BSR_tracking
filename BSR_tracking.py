@@ -52,13 +52,14 @@ chrome_options.add_argument("--headless")
 BROWSER = webdriver.Chrome('C:/Users/gedeo/OneDrive/Documenti/Python/chromedriver.exe', options=chrome_options)
 PRODUCT_URLS = {
                 "BidMamba": 'https://www.amazon.it/gp/product/B08F7QCT8M', 
-                "DEKOVITA": 'https://www.amazon.it/Dekovita-vaso-portaoggetti-Set-decorativo/dp/B078XGBKPR',
+                "Smart Safe": 'https://www.amazon.it/gp/product/B08LL7P37P/',
+                "PM Compressore Portatile": "https://www.amazon.it/gp/product/B08B68GG1W/",
                 }
 
 tracker = BestSellerRankTracker(BROWSER, PRODUCT_URLS)
 while True:
     tracker.get_BSR()
-    time.sleep(5)
+    time.sleep(60)
 
 # close Chrome window
 tracker.br.quit()

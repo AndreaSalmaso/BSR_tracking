@@ -1,5 +1,6 @@
 from selenium import webdriver
-import time
+import time, json, os
+from datetime import datetime
 
 
 class BestSellerRankTracker:
@@ -8,22 +9,40 @@ class BestSellerRankTracker:
         self.br = browser
         self.urls = product_urls
     
-    def get_BSR(self, delay=0):
+    def get_BSR(self):
         for product, url in self.urls.items():
+
+            JSON_file_path = f"{product}.json"
+            actual_date = datetime.now().strftime("%d-%m-%Y")
+            
+            try:
+                with open(JSON_file_path) as f:
+                    data = json.load(f)
+            except FileNotFoundError:
+                data = dict()
+                data[actual_date] = []
+            
+            # open product page
             self.br.get(url)
 
+            # retrieve the text containing the BSR
             while True:    
                 try:
-                    time.sleep(delay)
                     text = self.br.find_element_by_xpath('//*[@id="productDetails_detailBullets_sections1"]/tbody/tr[3]/td/span/span[1]').text
-                    BSR = int(text.replace(',', '').split()[1])
-                    print(f"BSR of {product} is {BSR}")
                     break
                 except Exception as e:
                     delay += 1
                     print(type(e).__name__)
+
+            # add the BSR to the json file
+            BSR = int(text.replace(',', '').split()[1])
+            print(f"BSR of {product} is {BSR}")
+            data[actual_date].append({"Time": datetime.now().strftime("%H:%M:%S"), "BSR": BSR})
+
+            with open(JSON_file_path, 'w') as f:
+                json.dump(data, f, indent=2)
+
         
-        self.br.close()
 
 
 # make the webdriver works in the background
@@ -37,5 +56,9 @@ PRODUCT_URLS = {
                 }
 
 tracker = BestSellerRankTracker(BROWSER, PRODUCT_URLS)
-tracker.get_BSR()
+while True:
+    tracker.get_BSR()
+    time.sleep(5)
 
+# close Chrome window
+tracker.br.quit()
